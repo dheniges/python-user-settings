@@ -75,8 +75,6 @@ class FileStorage(BaseStorage):
         except Exception:
             raise PermissionError(f'Unable to write to directory {self.SETTINGS_FILE_PATH}. Change permissions or update FILE_STORAGE_SETTINGS_DIR to a writeable directory')
 
-
-
     async def read(self, key):
         full_path = os.path.join(self.SETTINGS_FILE_PATH, key)
         if await aiofiles.os.path.isfile(full_path) == False:
