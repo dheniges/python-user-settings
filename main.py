@@ -1,5 +1,6 @@
-from typing import Annotated
+from typing import Annotated, Optional
 from fastapi import FastAPI, Path, Body
+from pydantic import BaseModel
 
 # Storage implementation. To replace storage strategies,
 # see storage/base_storage
@@ -18,10 +19,20 @@ MIN_USER_ID_LENGTH = 3
 
 app = FastAPI()
 
+class HealthResponse(BaseModel):
+    hello: str
+
+class GetResponse(BaseModel):
+    success: bool
+    value: Optional[str]
+
+class BoolResponse(BaseModel):
+    success: bool
+
 # Health check endpoint, useful for testing if app instances are running
 # since APIs don't have a homepage or may otherwise require auth
 @app.get("/health")
-async def health():
+async def health() -> HealthResponse:
     return {"Hello": "World"}
 
 # GET /user_id
@@ -33,7 +44,7 @@ async def get_user_settings(
              min_length=MIN_USER_ID_LENGTH,
              max_length=MAX_USER_ID_LENGTH)
     ]
-):
+) -> GetResponse:
     results = await storage.read(user_id)
 
     if results:
@@ -54,7 +65,7 @@ async def update_user_settings(
         min_length=MIN_SETTINGS_LENGTH,
         max_length=MAX_SETTINGS_LENGTH
     )]
-):
+) -> BoolResponse:
     results = await storage.write(user_id, settings)
     return { 'success': results }
 
@@ -67,6 +78,6 @@ async def delete_user_settings(
              min_length=MIN_USER_ID_LENGTH,
              max_length=MAX_USER_ID_LENGTH)
     ]
-):
+) -> BoolResponse:
     results = await storage.delete(user_id)
     return { 'success': results }
